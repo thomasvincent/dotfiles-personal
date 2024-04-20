@@ -1,0 +1,93 @@
+#!/bin/zsh
+#
+# This script configures the Powerlevel10k prompt for Zsh to enhance usability and productivity.
+# It provides a dynamic and informative command prompt including system information and development environment status.
+#
+# Author: Thomas Vincent
+# Date: 2024-04-19
+# Repository: https://github.com/thomasvincent/dotfiles-personal
+# License: MIT License
+#
+# For more information on usage and dependencies, refer to README.md in the repository.
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# Tip: Looking for a nice color palette? Try `p10k style`.
+
+# -- Wizard Generated --
+# Type `p10k configure` to generate another config.
+
+# -- Transient Prompt --
+# Reduces clutter by showing the prompt only when needed.
+typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=always
+
+# -- Instant Prompt --
+# Displays a minimal prompt immediately before the full prompt is ready.
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+# -- Left Prompt Elements --
+# Elements that appear on the left side of the prompt.
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+  dir                     # Current directory
+  vcs                     # Git status
+  status                  # Exit code of the last command
+  command_execution_time  # Duration of the last command
+)
+
+# -- Right Prompt Elements --
+# Elements that appear on the right side of the prompt.
+typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
+  kubecontext             # Current Kubernetes context
+  docker_machine          # Docker machine status
+  background_jobs         # Background jobs status
+  time                    # Current time
+  battery                 # Battery level and status
+  ram                     # Free RAM
+  load                    # CPU load and average
+)
+
+# -- Directory Display Settings --
+# Configuration for how directories are displayed in the prompt.
+typeset -g POWERLEVEL9K_SHORTEN_DIR_LENGTH=2
+typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
+typeset -g POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS=40
+typeset -g POWERLEVEL9K_DIR_TRUNCATE_BEFORE_MARKER=true
+typeset -g POWERLEVEL9K_DIR_SHOW_WRITABLE=true
+
+# -- Version Control System (VCS) --
+# Settings for displaying VCS (Git) information.
+typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='green'
+typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='yellow'
+typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='red'
+typeset -g POWERLEVEL9K_VCS_LOADING_FOREGROUND='gray'
+
+# -- Kubernetes Context --
+# Customization for how Kubernetes context is displayed.
+typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_FOREGROUND='cyan'
+typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_CONTENT_EXPANSION=' $P9K_CONTENT'
+
+# -- Docker Machine --
+# Display settings for active Docker Machine.
+typeset -g POWERLEVEL9K_DOCKER_MACHINE_FOREGROUND='blue'
+
+# -- Time Configuration --
+# Customize how time is displayed in the prompt.
+typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M:%S}'
+
+# -- Battery Display Settings --
+# Configuration for displaying battery information.
+typeset -g POWERLEVEL9K_BATTERY_DISCONNECTED_FOREGROUND='gray'
+typeset -g POWERLEVEL9K_BATTERY_CHARGING_FOREGROUND='green'
+typeset -g POWERLEVEL9K_BATTERY_CHARGED_FOREGROUND='green'
+typeset -g POWERLEVEL9K_BATTERY_LOW_THRESHOLD=20
+typeset -g POWERLEVEL9K_BATTERY_LOW_FOREGROUND='red'
+
+# -- RAM Usage Display --
+# Settings for displaying available RAM.
+typeset -g POWERLEVEL9K_RAM_FOREGROUND='magenta'
+
+# -- Load Average --
+# Settings for displaying system load averages.
+typeset -g POWERLEVEL9K_LOAD_CRITICAL_FOREGROUND='red'
+
+# Load Powerlevel10k theme (ensure it is installed).
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

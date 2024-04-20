@@ -1,58 +1,59 @@
 #!/usr/bin/env bash
 
-# Make vim the default editor.
-export EDITOR='vim';
+# Core Environment Setup
+export EDITOR='vim'
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export GPG_TTY=$(tty)
+export LESS_TERMCAP_md="${yellow}"
+export MANPAGER='less -X'
+export BASH_SILENCE_DEPRECATION_WARNING=1
 
-# Enable persistent REPL history for `node`.
-export NODE_REPL_HISTORY=~/.node_history;
-# Allow 32³ entries; the default is 1000.
-export NODE_REPL_HISTORY_SIZE='32768';
-# Use sloppy mode by default, matching web browsers.
-export NODE_REPL_MODE='sloppy';
+# History Configuration
+export HISTSIZE='32768'
+export HISTFILESIZE="${HISTSIZE}"
+export HISTCONTROL='ignoreboth'
 
-# Make Python use UTF-8 encoding for output to stdin, stdout, and stderr.
-export PYTHONIOENCODING='UTF-8';
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
 
-# Increase Bash history size. Allow 32³ entries; the default is 500.
-export HISTSIZE='32768';
-export HISTFILESIZE="${HISTSIZE}";
-# Omit duplicates and commands that begin with a space from history.
-export HISTCONTROL='ignoreboth';
+# Node.js Environment Setup
+export NODE_REPL_HISTORY=~/.node_history
+export NODE_REPL_HISTORY_SIZE='32768'
+export NODE_REPL_MODE='sloppy'
 
-# Prefer US English and use UTF-8.
-export LANG='en_US.UTF-8';
-export LC_ALL='en_US.UTF-8';
+# Python Environment Setup
+command_exists pyenv && {
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+}
 
-# Highlight section titles in manual pages.
-export LESS_TERMCAP_md="${yellow}";
-
-# Don’t clear the screen after quitting a manual page.
-export MANPAGER='less -X';
-
-# Avoid issues with `gpg` as installed via Homebrew.
-# https://stackoverflow.com/a/42265848/96656
-export GPG_TTY=$(tty);
-
-# Hide the “default interactive shell is now zsh” warning on macOS.
-export BASH_SILENCE_DEPRECATION_WARNING=1;
-
-# Add support for Terraform
-export TF_IN_AUTOMATION=1
-export TF_LOG=DEBUG
-
-# Add support for Go
-export GOPATH="${HOME}/go"
-export PATH="${PATH}:${GOPATH}/bin"
-
-# Add support for Ruby
-export PATH="${PATH}:/usr/local/opt/ruby/bin"
-
-# Add support for Java
+# Java Environment Setup
 export JAVA_HOME=$(/usr/libexec/java_home)
 export PATH="$PATH:$JAVA_HOME/bin"
 
-# Add support for Python
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+# Ruby Environment Setup
+export PATH="${PATH}:/usr/local/opt/ruby/bin"
+
+# Go Environment Setup
+export GOPATH="${HOME}/go"
+export PATH="${PATH}:${GOPATH}/bin"
+
+# Terraform Environment Setup
+export TF_IN_AUTOMATION=1
+export TF_LOG=DEBUG
+
+# Check tool-specific settings
+# Python Output Encoding
+export PYTHONIOENCODING='UTF-8'
+
+# Additional setup scripts
+# Modularize complex settings into separate files
+[ -f "$HOME/.config/shell/java_config.sh" ] && source "$HOME/.config/shell/java_config.sh"
+[ -f "$HOME/.config/shell/python_config.sh" ] && source "$HOME/.config/shell/python_config.sh"
+[ -f "$HOME/.config/shell/node_config.sh" ] && source "$HOME/.config/shell/node_config.sh"
+

@@ -1,0 +1,124 @@
+#!/bin/zsh
+#
+# This script contains utility functions to assist with development workflows involving Docker, Kubernetes,
+# GitHub, IntelliJ IDEA, and Visual Studio Code.
+#
+# Author: Thomas Vincent
+# Date: 2024-04-19
+# Repository: https://github.com/thomasvincent/dotfiles-personal
+# License: MIT License
+#
+# For more information on usage and dependencies, refer to README.md in the repository.
+
+### Docker Related Functions
+
+# Builds and pushes a Docker image, requiring a specific registry.
+# Globals: none
+# Arguments:
+#   1. Image name
+#   2. Tag
+#   3. Docker registry URL
+# Outputs: Messages about Docker build and push status
+# Returns: Exit status of the last command run
+function docker_build_push() {
+  local image_name=$1
+  local tag=$2
+  local registry=${3? "Error: Please specify a Docker registry."}
+  docker build -t "$registry/$image_name:$tag" .
+  docker push "$registry/$image_name:$tag"
+}
+
+### Kubernetes Related Functions
+
+# Deploys Kubernetes manifests and checks deployment status with custom options.
+# Globals: none
+# Arguments:
+#   1. Kubernetes manifest file
+#   2. Boolean to skip rollout status check (optional)
+#   3. Rollout timeout (optional)
+# Outputs: Messages from kubectl commands
+# Returns: Exit status of the kubectl apply command
+function kube_deploy() {
+  local manifest=${1? "Error: Please specify a Kubernetes manifest file."}
+  local skip_rollout=${2:-false}
+  local timeout=${3:-"120s"}
+
+  kubectl apply -f "$manifest"
+  if [[ $skip_rollout == false ]]; then
+    kubectl rollout status deployment/"$(kubectl get deployment -o=jsonpath='{.items[0].metadata.name}')" --timeout="$timeout"
+  fi
+}
+
+### GitHub Related Functions
+
+# Opens a new GitHub issue via the web browser, with smart repo URL detection.
+# Globals: none
+# Arguments: none
+# Outputs: Opens default web browser to GitHub new issue page
+# Returns: none
+function open_github_issue() {
+  local repo_url=${$(git config --get remote.origin.url || git remote -v | grep origin | grep push | awk '{print $2}')%.*}
+  open "${repo_url}/issues/new"
+}
+
+# Opens recent GitHub pull requests for review, considering different remotes.
+# Globals: none
+# Arguments: none
+# Outputs: Opens default web browser to GitHub comparison pages
+# Returns: none
+function open_recent_prs() {
+  local recent_branches=($(git for-each-ref --sort=-committerdate refs/heads/ --format="%(refname:short)" | head -5))
+  for branch in $recent_branches; do
+    local remote=$(git config branch.$branch.remote || echo "origin")
+    echo "Opening PR for $branch on remote $remote"
+    open "https://github.com/$remote/$branch/compare"
+  done
+}
+
+### IDE Related Functions
+
+# Opens a project in IntelliJ IDEA with an installation check.
+# Globals: none
+# Arguments:
+#   1. Project directory path
+# Outputs: Error message if IntelliJ IDEA is not installed
+# Returns: none
+function idea_open_project() {
+  local project_dir=$1
+  if command -v open >/dev/null 2>&1; then
+    open -a "IntelliJ IDEA" "$project_dir"
+  else
+    echo "Error: IntelliJ IDEA is not installed."
+  fi
+}
+
+# Opens a folder in Visual Studio Code with an installation check.
+# Globals: none
+# Arguments:
+#   1. Folder path
+# Outputs: Error message if Visual Studio Code is not installed
+# Returns: none
+function vscode_open_folder() {
+  local folder_path=$1
+  if command -v code >/dev/null 2>&1; then
+    code "$folder_path"
+  else
+    echo "Error: Visual Studio Code is not installed."
+  fi
+}
+
+### Log Management Functions
+
+# Tails and filters log files based on multiple severities.
+# Globals: none
+# Arguments:
+#   1. File path
+#   2+. Severities to filter by
+# Outputs: Filtered log output to STDOUT
+# Returns: none
+function log_tail() {
+  local file_path=$1
+  shift  # Remove first argument
+  local severities=("$@")
+  tail -f "$file_path" | grep --color=always -E "${(j:|:)severities}"
+}

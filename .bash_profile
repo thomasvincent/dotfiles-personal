@@ -1,62 +1,47 @@
-# Add custom bin directories to the PATH
-export PATH="$HOME/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
+#!/bin/bash
+# .bash_profile
+#
+# Description: This script is executed for login shells on Unix-like systems. It initializes
+# core environment settings and sources the .bashrc for interactive settings applicable
+# across all sessions.
+#
+# Usage: Sourced by the shell automatically at login.
+#
+# Author: Thomas Vincent
+# Repository: https://www.github.com/thomasvincent/dotfiles-public
+# License: MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-# Load environment-specific configuration files
-if [ -f "$HOME/.bashrc_aws" ]; then
-    source "$HOME/.bashrc_aws"
-fi
-if [ -f "$HOME/.bashrc_gcp" ]; then
-    source "$HOME/.bashrc_gcp"
-fi
-if [ -f "$HOME/.bashrc_azure" ]; then
-    source "$HOME/.bashrc_azure"
-fi
-if [ -f "$HOME/.bashrc_k8s" ]; then
-    source "$HOME/.bashrc_k8s"
-fi
+echo "Loading .bash_profile configurations..."
 
-# Load the shell dotfiles, and then some:
-# * ~/.path can be used to extend `$PATH`.
-# * ~/.extra can be used for other settings you don’t want to commit.
-for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
-    [ -r "$file" ] && [ -f "$file" ] && source "$file"
-done
-unset file
+# Core Environment Setup
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export GPG_TTY=$(tty)
 
-# Case-insensitive globbing (used in pathname expansion)
-shopt -s nocaseglob
-
-# Append to the Bash history file, rather than overwriting it
-shopt -s histappend
-
-# Autocorrect typos in path names when using `cd`
-shopt -s cdspell
-
-# Enable some Bash 4 features when possible:
-# * `autocd`, e.g. `**/qux` will enter `./foo/bar/baz/qux`
-# * Recursive globbing, e.g. `echo **/*.txt`
-for option in autocd globstar; do
-    shopt -s "$option" 2> /dev/null
-done
-
-# Add tab completion for many Bash commands
-if which brew &> /dev/null && [ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]; then
-    # Ensure existing Homebrew v1 completions continue to work
-    export BASH_COMPLETION_COMPAT_DIR="$(brew --prefix)/etc/bash_completion.d"
-    source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
-elif [ -f /etc/bash_completion ]; then
-    source /etc/bash_completion
+# Load .bashrc if it exists
+if [ -f "$HOME/.bashrc" ]; then
+    source "$HOME/.bashrc"
 fi
 
-# Enable tab completion for `g` by marking it as an alias for `git`
-if type _git &> /dev/null; then
-    complete -o default -o nospace -F _git g
-fi
+# macOS specific configurations
+[ "$(uname -s)" = "Darwin" ] && export BASH_SILENCE_DEPRECATION_WARNING=1
 
-# Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
-[ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2- | tr ' ' '\n')" scp sftp ssh
-
-# You could just use `-g` instead, but I like being explicit
-# Add tab completion for `defaults read|write NSGlobalDomain`
-complete -W "NSGlobalDomain" defaults
-
+echo "Loaded .bash_profile configurations."
