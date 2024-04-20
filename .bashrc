@@ -57,13 +57,18 @@ if command -v pyenv >/dev/null 2>&1; then
 fi
 
 # Java Environment Setup
-export JAVA_HOME=$(/usr/libexec/java_home)
-export PATH="$PATH:$JAVA_HOME/bin"
+JAVA_HOME=$(/usr/libexec/java_home)
+export JAVA_HOME
+PATH="$PATH:$JAVA_HOME/bin"
+export PATH
 
 # Additional setups like Ruby, Go, etc.
-export PATH="$PATH:/usr/local/opt/ruby/bin"
-export GOPATH="$HOME/go"
-export PATH="$PATH:$GOPATH/bin"
+PATH="/usr/local/opt/ruby/bin:$PATH"
+export PATH
+GOPATH="$HOME/go"
+export GOPATH
+PATH="$GOPATH/bin:$PATH"
+export PATH
 
 # Bash Completions
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
