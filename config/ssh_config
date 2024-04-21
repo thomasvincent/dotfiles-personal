@@ -1,0 +1,47 @@
+# GitHub.com specific settings
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+
+# Default settings for all hosts
+Host *
+  # Use only SSH protocol version 2
+  Protocol 2
+
+  # Prioritize the most secure ciphers, MACs, key exchange (aligned with modern best practices)
+  Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr@openssh.com,aes128-ctr@openssh.com
+  MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+  KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+
+  # Improved connection multiplexing with secure path
+  ControlMaster auto
+  ControlPath ~/.ssh/controlmasters/%r@%h:%p
+  ControlPersist 1800
+
+  # Security-focused choices
+  Compression no
+  TCPKeepAlive yes
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+  UseRoaming no
+  IgnoreRhosts yes
+  RhostsRSAAuthentication no
+  RSAAuthentication no
+
+  # More stringent host key handling
+  StrictHostKeyChecking yes  # Accept new hosts, but warn
+  UserKnownHostsFile ~/.ssh/known_hosts # Maintain known hosts
+
+  # Reasonable login controls
+  MaxAuthTries 6
+  ForwardAgent no
+  ForwardX11 no
+  SendEnv LANG LC_*
+
+  # macOS Keychain integration is automatic by default!
+  # No need to explicitly add 'AddKeysToAgent yes'
+
+  # Use the system's authentication socket
+  UseAuthSock yes

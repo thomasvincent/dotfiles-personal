@@ -1,0 +1,12 @@
+[source]
+# Common configuration files in config/
+dot_bashrc = "config/.bashrc"
+dot_zshrc = "config/.zshrc"
+dot_zprofile = "config/.zprofile"
+dot_aliases = "config/.aliases.zsh"
+dot_functions = "config/.functions.zsh"
+dot_gitconfig = "config/.gitconfig"
+dot_editorconfig = "config/.editorconfig"
+dot_tmux.conf = "config/.tmux.conf"
+dot_vimrc = "config/.vimrc"  # If you use Vim
+dot_nvimrc = "config/.nvimrc" # If you use Neovim

@@ -1,0 +1,61 @@
+# -*- mode: gitconfig -*-
+# .gitconfig - Global Git Configuration for macOS
+
+[user]
+  name = Your Full Name
+  email = your_email@example.com
+  signingkey = <your-key-id>
+
+[commit]
+  gpgsign = true
+
+[alias]
+  # Basic Git operations
+  st = status
+  co = checkout
+  ci = commit
+  br = branch
+
+  # Advanced Git operations
+  amend = commit --amend
+  pr = push origin HEAD
+
+  # macOS-specific aliases
+  osx-open = "!f() { REPO_PATH=$(git rev-parse --show-toplevel); open \"$REPO_PATH\"; }; f"
+  finder = osx-open
+
+[merge "customDriver"]
+  name = Custom Merge Strategy
+  driver = /usr/local/bin/merge-script.sh
+
+[diff]
+  algorithm = histogram
+
+[core]
+  hooksPath = .githooks
+  excludesfile = ~/.gitignore_global
+
+[color]
+  ui = auto
+
+[include]
+  path = .gitconfig-theme
+  path = .gitconfig-extensions
+
+[pull]
+  rebase = true
+
+[credential]
+  helper = osxkeychain
+
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
+[gpg]
+  program = /usr/local/bin/gpg
+
+[init]
+  defaultBranch = main

@@ -1,9 +1,0 @@
-alias gcohf="git checkout -b hotfix/" # Checkout new hotfix
-alias gcof="git checkout -b feature/" # Checkout new feature
-alias kdeploy="kubectl apply -f deployment.yaml && git commit -am 'Deploy latest changes' && git push"
-alias tf='terraform'
-alias tfi='terraform init'
-alias tfp='terraform plan'
-alias tfa='terraform apply'
-alias tfv='terraform validate'
-alias tfapplypush="terraform apply -auto-approve && git commit -am 'Apply Terraform changes' && git push"

@@ -1,0 +1,432 @@
+#!/usr/bin/env bash
+
+# Create a new directory and enter it
+function mkd() {
+	mkdir -p "$@" && cd "$_";
+}
+
+# Change working directory to the top-most Finder window location
+function cdf() { # short for `cdfinder`
+	cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
+}
+
+# Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
+function targz() {
+	local tmpFile="${@%/}.tar";
+	tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1;
+
+	size=$(
+		stat -f"%z" "${tmpFile}" 2> /dev/null; # macOS `stat`
+		stat -c"%s" "${tmpFile}" 2> /dev/null;  # GNU `stat`
+	);
+
+	local cmd="";
+	if (( size < 52428800 )) && hash zopfli 2> /dev/null; then
+		# the .tar file is smaller than 50 MB and Zopfli is available; use it
+		cmd="zopfli";
+	else
+		if hash pigz 2> /dev/null; then
+			cmd="pigz";
+		else
+			cmd="gzip";
+		fi;
+	fi;
+
+	echo "Compressing .tar ($((size / 1000)) kB) using \`${cmd}\`…";
+	"${cmd}" -v "${tmpFile}" || return 1;
+	[ -f "${tmpFile}" ] && rm "${tmpFile}";
+
+	zippedSize=$(
+		stat -f"%z" "${tmpFile}.gz" 2> /dev/null; # macOS `stat`
+		stat -c"%s" "${tmpFile}.gz" 2> /dev/null; # GNU `stat`
+	);
+
+	echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully.";
+}
+
+# Determine size of a file or total size of a directory
+function fs() {
+	if du -b /dev/null > /dev/null 2>&1; then
+		local arg=-sbh;
+	else
+		local arg=-sh;
+	fi
+	if [[ -n "$@" ]]; then
+		du $arg -- "$@";
+	else
+		du $arg .[^.]* ./*;
+	fi;
+}
+
+# Use Git’s colored diff when available
+hash git &>/dev/null;
+if [ $? -eq 0 ]; then
+	function diff() {
+		git diff --no-index --color-words "$@";
+	}
+fi;
+
+# Create a data URL from a file
+function dataurl() {
+	local mimeType=$(file -b --mime-type "$1");
+	if [[ $mimeType == text/* ]]; then
+		mimeType="${mimeType};charset=utf-8";
+	fi
+	echo "data:${mimeType};base64,$(openssl base64 -in "$1" | tr -d '\n')";
+}
+
+# Start an HTTP server from a directory, optionally specifying the port
+function server() {
+	local port="${1:-8000}";
+	sleep 1 && open "http://localhost:${port}/" &
+	# Set the default Content-Type to `text/plain` instead of `application/octet-stream`
+	# And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
+	python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port";
+}
+
+# Start a PHP server from a directory, optionally specifying the port
+# (Requires PHP 5.4.0+.)
+function phpserver() {
+	local port="${1:-4000}";
+	local ip=$(ipconfig getifaddr en1);
+	sleep 1 && open "http://${ip}:${port}/" &
+	php -S "${ip}:${port}";
+}
+
+# Compare original and gzipped file size
+function gz() {
+	local origsize=$(wc -c < "$1");
+	local gzipsize=$(gzip -c "$1" | wc -c);
+	local ratio=$(echo "$gzipsize * 100 / $origsize" | bc -l);
+	printf "orig: %d bytes\n" "$origsize";
+	printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio";
+}
+
+# Run `dig` and display the most useful info
+function digga() {
+	dig +nocmd "$1" any +multiline +noall +answer;
+}
+
+# Show all the names (CNs and SANs) listed in the SSL certificate
+# for a given domain
+function getcertnames() {
+	if [ -z "${1}" ]; then
+		echo "ERROR: No domain specified.";
+		return 1;
+	fi;
+
+	local domain="${1}";
+	echo "Testing ${domain}…";
+	echo ""; # newline
+
+	local tmp=$(echo -e "GET / HTTP/1.0\nEOT" \
+		| openssl s_client -connect "${domain}:443" -servername "${domain}" 2>&1);
+
+	if [[ "${tmp}" = *"-----BEGIN CERTIFICATE-----"* ]]; then
+		local certText=$(echo "${tmp}" \
+			| openssl x509 -text -certopt "no_aux, no_header, no_issuer, no_pubkey, \
+			no_serial, no_sigdump, no_signame, no_validity, no_version");
+		echo "Common Name:";
+		echo ""; # newline
+		echo "${certText}" | grep "Subject:" | sed -e "s/^.*CN=//" | sed -e "s/\/emailAddress=.*//";
+		echo ""; # newline
+		echo "Subject Alternative Name(s):";
+		echo ""; # newline
+		echo "${certText}" | grep -A 1 "Subject Alternative Name:" \
+			| sed -e "2s/DNS://g" -e "s/ //g" | tr "," "\n" | tail -n +2;
+		return 0;
+	else
+		echo "ERROR: Certificate not found.";
+		return 1;
+	fi;
+}
+
+# Normalize `open` across Linux, macOS, and Windows.
+# This is needed to make the `o` function (see below) cross-platform.
+if [ ! $(uname -s) = 'Darwin' ]; then
+	if grep -q Microsoft /proc/version; then
+		# Ubuntu on Windows using the Linux subsystem
+		alias open='explorer.exe';
+	else
+		alias open='xdg-open';
+	fi
+fi
+
+# `o` with no arguments opens the current directory, otherwise opens the given
+# location
+function o() {
+	if [ $# -eq 0 ]; then
+		open .;
+	else
+		open "$@";
+	fi;
+}
+
+# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
+# the `.git` directory, listing directories first. The output gets piped into
+# `less` with options to preserve color and line numbers, unless the output is
+# small enough for one screen.
+function tre() {
+	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
+}
+
+#!/usr/bin/env zsh
+
+# Description: Custom functions for Zsh optimized for macOS. This script provides
+# a variety of functions for directory management, file compression, network utilities,
+# system management, and extended support for git flow, gitops, Visual Studio Code,
+# IntelliJ IDEA, and GitHub integration.
+
+# Existing functions here...
+
+# Open Visual Studio Code
+function code_open() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Directory path is required."
+    return 1
+  fi
+  echo "Opening Visual Studio Code in $1..."
+  code "$1"
+}
+
+# Open IntelliJ IDEA
+function idea_open() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Directory path is required."
+    return 1
+  fi
+  echo "Opening IntelliJ IDEA in $1..."
+  idea "$1"
+}
+
+# Git Flow and GitHub Integration
+function git_flow_feature_from_issue() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Issue number is required."
+    return 1
+  fi
+  local branch_name="feature/issue-$1"
+  echo "Starting feature branch for issue #$1..."
+  git flow feature start "$branch_name"
+  git push --set-upstream origin "$branch_name"
+  echo "Branch '$branch_name' created and pushed. Ready for work!"
+}
+
+function git_flow_finish_feature_from_issue() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Issue number is required."
+    return 1
+  fi
+  local branch_name="feature/issue-$1"
+  echo "Finishing feature branch for issue #$1..."
+  git flow feature finish "$branch_name"
+  git push origin --delete "$branch_name"
+  echo "Branch '$branch_name' finished and remote deleted."
+}
+
+#!/usr/bin/env zsh
+
+# Description: Custom functions for Zsh optimized for macOS. This script provides
+# a variety of functions for directory management, file compression, network utilities,
+# system management, and extended support for git flow and gitops.
+
+# Existing functions here...
+
+# Git Flow Functions
+function git_flow_start_feature() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Feature name is required."
+    return 1
+  fi
+  git flow feature start "$1"
+}
+
+function git_flow_finish_feature() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Feature name is required."
+    return 1
+  fi
+  git flow feature finish "$1"
+}
+
+function git_flow_release() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Release version is required."
+    return 1
+  fi
+  git flow release start "$1"
+  echo "Remember to bump the version number if necessary."
+}
+
+function git_flow_finish_release() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Release version is required."
+    return 1
+  fi
+  git flow release finish "$1"
+}
+
+# GitOps Functions
+function gitops_apply_manifest() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Kubernetes manifest file path is required."
+    return 1
+  fi
+  kubectl apply -f "$1"
+  echo "Applied manifest: $1"
+}
+
+function gitops_delete_manifest() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Kubernetes manifest file path is required."
+    return 1
+  fi
+  kubectl delete -f "$1"
+  echo "Deleted manifest: $1"
+}
+
+function gitops_sync() {
+  local namespace="${2:-default}"
+  if [ -z "$1" ]; then
+    echo "ERROR: Kubernetes manifest directory is required."
+    return 1
+  fi
+  for file in $(find "$1" -name '*.yaml'); do
+    echo "Applying $file in namespace $namespace..."
+    kubectl apply -f "$file" -n $namespace
+  done
+  echo "All manifests in $1 have been synchronized."
+}
+
+#!/usr/bin/env zsh
+
+# Description: Custom functions for Zsh optimized for macOS. This script provides
+# a variety of functions for directory management, file compression, network utilities,
+# system management, and extended support for HashiCorp products.
+
+# Existing functions here...
+
+# Terraform Functions
+function terraform_init() {
+  echo "Initializing Terraform..."
+  terraform init
+}
+
+function terraform_apply() {
+  echo "Applying Terraform configuration..."
+  terraform apply
+}
+
+function terraform_destroy() {
+  echo "Destroying Terraform infrastructure..."
+  terraform destroy
+}
+
+# Vault Functions
+function vault_read_secret() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Secret path is required."
+    return 1
+  fi
+  echo "Reading secret from Vault at path: $1"
+  vault read "$1"
+}
+
+function vault_write_secret() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "ERROR: Secret path and value are required."
+    return 1
+  fi
+  echo "Writing secret to Vault at path: $1"
+  vault write "$1" "$2"
+}
+
+# Consul Functions
+function consul_register_service() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Service definition file is required."
+    return 1
+  fi
+  echo "Registering service with Consul using definition file: $1"
+  consul services register "$1"
+}
+
+function consul_deregister_service() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Service ID is required."
+    return 1
+  fi
+  echo "Deregistering service from Consul with ID: $1"
+  consul services deregister "$1"
+}
+
+# Packer Functions
+function packer_build_image() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Packer template file is required."
+    return 1
+  fi
+  echo "Building image with Packer using template file: $1"
+  packer build "$1"
+}
+
+#!/usr/bin/env zsh
+
+# Description: Custom functions for Zsh optimized for macOS. This script provides
+# a variety of functions for directory management, file compression, network utilities,
+# system management, and extended support for HashiCorp Nomad alongside other products.
+
+# Existing functions here...
+
+# Nomad Functions
+
+# Start a Nomad job using a specified job file
+function nomad_start_job() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Job file is required."
+    return 1
+  fi
+  echo "Starting Nomad job using file: $1"
+  nomad job run "$1"
+}
+
+# Stop a Nomad job by ID
+function nomad_stop_job() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Job ID is required."
+    return 1
+  fi
+  echo "Stopping Nomad job with ID: $1"
+  nomad job stop "$1"
+}
+
+# Get the status of a Nomad job
+function nomad_job_status() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Job ID is required."
+    return 1
+  fi
+  echo "Getting status for Nomad job with ID: $1"
+  nomad job status "$1"
+}
+
+# Plan a Nomad job to see changes without applying them
+function nomad_plan_job() {
+  if [ -z "$1" ]; then
+    echo "ERROR: Job file is required."
+    return 1
+  fi
+  echo "Planning Nomad job using file: $1"
+  nomad job plan "$1"
+}
+
+# List all running Nomad jobs
+function nomad_list_jobs() {
+  echo "Listing all Nomad jobs..."
+  nomad job status
+}
+
+# Remember to include all previous functions and aliases defined earlier.
+
+
+
