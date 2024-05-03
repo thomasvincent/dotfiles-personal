@@ -1,32 +1,26 @@
+# Root settings that apply to all files unless overwritten
 root = true
-
-[*.tf]
-indent_size = 2
-indent_style = space
 
 [*]
 charset = utf-8
-indent_style = tab
+indent_style = space
+indent_size = 4      # Default indent size, overridden for specific types
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.py]
-indent_size = 4
-indent_style = space
+# Terraform files
+[*.tf]
+indent_size = 2      # Override default indent size for Terraform files
 
+# Shell scripts
 [*.sh]
-indent_size = 2
-indent_style = tab
+indent_size = 2      # Override default indent size for shell scripts
+indent_style = tab   # Override default indent style (use tab)
 
+# Ruby files
 [*.rb]
-indent_size = 2
-indent_style = space
+indent_size = 2      # Override default indent size for Ruby files
 
-[*.java]
-indent_size = 4
-indent_style = space
-
-[*.go]
-indent_size = 4
-indent_style = space
+# Default settings already match for Python, Java, and Go files
+# No need for specific overrides unless additional deviations are needed
