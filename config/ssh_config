@@ -1,10 +1,3 @@
-# GitHub.com specific settings
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/id_ed25519
-  IdentitiesOnly yes
-
 # Default settings for all hosts
 Host *
   # Use only SSH protocol version 2
@@ -20,7 +13,7 @@ Host *
   ControlPath ~/.ssh/controlmasters/%r@%h:%p
   ControlPersist 1800
 
-  # Security-focused choices
+  # Security -focused choices
   Compression no
   TCPKeepAlive yes
   ServerAliveInterval 60
@@ -31,8 +24,8 @@ Host *
   RSAAuthentication no
 
   # More stringent host key handling
-  StrictHostKeyChecking yes  # Accept new hosts, but warn
-  UserKnownHostsFile ~/.ssh/known_hosts # Maintain known hosts
+  StrictHostKeyChecking ask
+  UserKnownHostsFile ~/.ssh/known_hosts
 
   # Reasonable login controls
   MaxAuthTries 6
@@ -40,8 +33,111 @@ Host *
   ForwardX11 no
   SendEnv LANG LC_*
 
-  # macOS Keychain integration is automatic by default!
-  # No need to explicitly add 'AddKeysToAgent yes'
-
   # Use the system's authentication socket
   UseAuthSock yes
+
+# GitHub.com specific settings
+Host github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+
+# GitLab-specific settings
+Host gitlab.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_gitlab
+  IdentitiesOnly yes
+
+# Bitbucket-specific settings
+Host bitbucket.org
+  User git
+  IdentityFile ~/.ssh/id_ed25519_bitbucket
+  IdentitiesOnly yes
+
+# DigitalOcean Droplets 
+Host *.ondigitalocean.com
+  User root
+  IdentityFile ~/.ssh/id_ed25519_digitalocean
+  IdentitiesOnly yes
+
+# Linode Instances
+# Use naming or IP specific patterns if needed
+Host *.linode.com
+  User root
+  IdentityFile ~/.ssh/id_ed25519_linode
+  IdentitiesOnly yes
+
+# Azure DevOps - Uncomment to enable
+# Host ssh.dev.azure.com
+#  User git
+#  IdentityFile ~/.ssh/id_ed25519_azure
+#  IdentitiesOnly yes
+
+# AWS CodeCommit - Uncomment to enable
+# Host git-codecommit.*.amazonaws.com
+#  User APKAEIBAERJR2EXAMPLE
+#  IdentityFile ~/.ssh/id_ed25519_codecommit
+#  IdentitiesOnly yes
+#  # The user 'APKAEIBAERJR2EXAMPLE' should be replaced with your IAM user's specific SSH key ID.
+
+# Beanstalk - Uncomment to enable
+# Host accountname.beanstalkapp.com
+#  User git
+#  IdentityFile ~/.ssh/id_ed25519_beanstalk
+#  IdentitiesOnly yes
+#  # Replace 'accountname' with your actual account name.
+
+# Gitea/Gogs - Uncomment to enable
+# Host gitea.example.com
+#  User git
+#  IdentityFile ~/.ssh/id_ed25519_gitea
+#  IdentitiesOnly yes
+#  # Replace 'gitea.example.com' with your actual Gitea/Gogs server domain.
+
+# Assembla - Uncomment to enable
+# Host assembla.com
+#  User git
+#  IdentityFile ~/.ssh/id_ed25519_assembla
+#  IdentitiesOnly yes
+
+# SourceForge - Uncomment to enable
+# Host shell.sourceforge.net
+#  User git
+#  IdentityFile ~/.ssh/id_ed25519_sourceforge
+#  IdentitiesOnly yes
+
+# Amazon Web Services (AWS) - Replace '# Host your-aws-server' with actual host or pattern
+# Host your-aws-server
+#   User ec2-user
+#   IdentityFile ~/.ssh/id_ed25519_aws
+#   IdentitiesOnly yes
+
+# Google Cloud Platform (GCP) - Replace '# Host your-gcp-server' with your GCP VM instance
+# Host your-gcp-server
+#   User your-gcp-username
+#   IdentityFile ~/.ssh/id_ed25519_gcp
+#   IdentitiesOnly yes
+
+# Microsoft Azure - Replace '# Host your-azure-server' with your Azure VM configuration
+# Host your-azure-server
+#   User azureuser
+#   IdentityFile ~/.ssh/id_ed25519_azure
+#   IdentitiesOnly yes
+
+# IBM Cloud - Replace '# Host your-ibm-server' with relevant IBM Cloud hostnames or IPs
+# Host your-ibm-server
+#   User root
+#   IdentityFile ~/.ssh/id_ed25519_ibm
+#   IdentitiesOnly yes
+
+# Oracle Cloud - Replace '# Host your-oracle-server' with individual or wildcard domain
+# Host your-oracle-server
+#   User opc
+#   IdentityFile ~/.ssh/id_ed25519_oracle
+#   IdentitiesOnly yes
+
+# Alibaba Cloud - Replace '# Host your-alibaba-server' with your ECS instance details
+# Host your-alibaba-server
+#   User root
+#   IdentityFile ~/.ssh/id_ed25519_alibaba
+#   IdentitiesOnly yes
