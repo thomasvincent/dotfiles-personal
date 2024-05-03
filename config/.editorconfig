@@ -22,5 +22,5 @@ indent_style = tab   # Override default indent style (use tab)
 [*.rb]
 indent_size = 2      # Override default indent size for Ruby files
 
-# Default settings already match for Python, Java, and Go files
+# Default settings already match for Python, Java, PHP, Node.js, and Go files
 # No need for specific overrides unless additional deviations are needed
