@@ -1,82 +1,61 @@
 #!/usr/bin/env zsh
 
-# Configures the Powerlevel10k prompt for Zsh, enhancing usability and productivity
-# with a dynamic and informative command prompt. It displays system information and
-# development environment status, optimized for macOS.
+# Configures the Powerlevel10k prompt for Zsh to enhance usability and productivity.
+# Displays dynamic system information and development environment status, optimized for macOS.
 
 # Author: Thomas Vincent
-# Date: 2024-04-19
-# Repository: https://github.com/thomasvincent/dotfiles-personal
+# Date: 2024-05-15
+# Repository: 5ttps://github.com/thomasvincent/dotfiles-personal
 # License: MIT License
 
-# For installation details and usage, see README.md in the repository.
+# For installation details and usage, refer to README.md in the repository.
 
-# Check if Powerlevel10k is installed before sourcing the configuration.
-if [[ ! -f ~/.p10k.zsh ]]; then
-  echo "Powerlevel10k configuration file not found. Please install Powerlevel10k."
+# Ensure the script is running in a compatible Zsh environment
+if [[ $ZSH_VERSION != 5.* ]]; then
+  echo "Incompatible Zsh version. Powerlevel10k requires Zsh 5.x. Current version: $ZSH_VERSION"
   exit 1
 fi
-source ~/.p10k.zsh
 
-# Configure prompt behavior and appearance below.
+# Function to load Powerlevel10k configuration
+load_p10k_config() {
+  local config_file="${HOME}/.p10k.zsh"
+  if [[ -f "${config_file}" ]]; then
+    source "${config_file}"
+  else
+    echo "Powerlevel10k configuration file not found at ${config_file}. Please install Powerlevel10k."
+    exit 1
+  fi
+}
 
-# Transient Prompt: Minimizes the prompt to the last line when not active.
+# Initialize Powerlevel10k configuration
+load_p10k_config
+
+# Configure transient and instant prompt behaviors
 typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=always
-
-# Instant Prompt: Shows a minimal prompt immediately before full prompt initialization.
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
-# Elements on the left side of the prompt.
-typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
-  dir                     # Current directory
-  vcs                     # Version control system status
-  status                  # Exit code of the last command
-  command_execution_time  # Duration of the last command
-)
+# Define left and right prompt elements
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status command_execution_time)
+typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(kubecontext docker_machine background_jobs time battery ram load)
 
-# Elements on the right side of the prompt.
-typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
-  kubecontext             # Kubernetes context
-  docker_machine          # Docker machine status
-  background_jobs         # Background jobs
-  time                    # Current time
-  battery                 # Battery status
-  ram                     # RAM usage
-  load                    # System load
-)
-
-# Directory display configuration.
+# Detailed configuration for prompt elements
 typeset -g POWERLEVEL9K_SHORTEN_DIR_LENGTH=2
 typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
 typeset -g POWERLEVEL9K_DIR_MIN_COMMAND_COLUMNS=40
 typeset -g POWERLEVEL9K_DIR_TRUNCATE_BEFORE_MARKER=true
 typeset -g POWERLEVEL9K_DIR_SHOW_WRITABLE=true
-
-# Version control system (VCS) display settings.
 typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND='green'
 typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND='yellow'
 typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND='red'
 typeset -g POWERLEVEL9K_VCS_LOADING_FOREGROUND='gray'
-
-# Kubernetes context display customization.
 typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_FOREGROUND='cyan'
 typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_CONTENT_EXPANSION=' $P9K_CONTENT'
-
-# Docker Machine status display.
 typeset -g POWERLEVEL9K_DOCKER_MACHINE_FOREGROUND='blue'
-
-# Time display format.
 typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M:%S}'
-
-# Battery display settings.
 typeset -g POWERLEVEL9K_BATTERY_DISCONNECTED_FOREGROUND='gray'
 typeset -g POWERLEVEL9K_BATTERY_CHARGING_FOREGROUND='green'
 typeset -g POWERLEVEL9K_BATTERY_CHARGED_FOREGROUND='green'
 typeset -g POWERLEVEL9K_BATTERY_LOW_THRESHOLD=20
 typeset -g POWERLEVEL9K_BATTERY_LOW_FOREGROUND='red'
-
-# RAM usage display.
 typeset -g POWERLEVEL9K_RAM_FOREGROUND='magenta'
-
-# System load average display.
 typeset -g POWERLEVEL9K_LOAD_CRITICAL_FOREGROUND='red'
