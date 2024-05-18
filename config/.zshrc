@@ -1,45 +1,49 @@
 #!/bin/zsh
 # -*- mode: sh -*-
-# .zshrc - Interactive shell configuration for macOS Catalina
+# .zshrc - Interactive shell configuration for macOS Catalina with Homebrew, iTerm2, GitHub, and Git integration
 
-# Set up strict script execution
+echo "Initializing Zsh configuration for macOS..."
+
+# Set strict execution modes
 set -euo pipefail
 
-# Local variables
-local cache_file="$XDG_CACHE_HOME/p10k-instant-prompt-${(%):-%n}.zsh"
-local completion_file="/usr/local/share/zsh/site-functions/_gh"
+# Define local variables for cache and completions
+local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+local gh_completion_file="$(brew --prefix)/share/zsh/site-functions/_gh"  # Assuming Homebrew installation
 
-# Inform user about script loading
-echo "Loading .zshrc configurations..."
-
-# Source custom functions
-source "$HOME/.zsh/functions.zsh"
-
-# Source custom aliases.zsh
-source "$HOME/.zsh/aliases.zsh"
-
-# Configure zsh plugins
+# Define function to configure zsh plugins using oh-my-zsh
 function configure_zsh_plugins() {
-  source "$ZSH/oh-my-zsh.sh" || echo "Failed to load oh-my-zsh.sh"
-  plugins=(git gitfast brew osx kubectl helm terraform aws azure docker)
+  local oh_my_zsh_init="${ZSH:-$HOME/.oh-my-zsh}/oh-my-zsh.sh"
+  if [[ -f "$oh_my_zsh_init" ]]; then
+    source "$oh_my_zsh_init"
+    plugins=(git gitfast osx kubectl helm terraform aws azure docker)
+  else
+    echo "oh-my-zsh not found. Please install or check the path."
+  fi
 }
 
-# Check and load cache_file if it exists
-[[ -r "$cache_file" ]] && source "$cache_file"
+# Source essential scripts
+for file in "$HOME/.zsh/functions.zsh" "$HOME/.zsh/aliases.zsh"; do
+  [[ -f "$file" ]] && source "$file" || echo "Configuration file missing: $file"
+done
 
 # Configure zsh plugins
 configure_zsh_plugins
 
-# Enable completions
+# Enable shell completion
 autoload -Uz compinit && compinit -i
 
-# Customize prompt (using powerlevel10k)
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+# Customize the prompt using Powerlevel10k, if available
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh" || echo "Powerlevel10k config missing."
 
-# GitHub CLI completion
-[[ -r "$completion_file" ]] && source "$completion_file"
+# Load GitHub CLI completions from Homebrew path
+[[ -f "$gh_completion_file" ]] && source "$gh_completion_file" || echo "GitHub CLI completions not found."
 
-# iTerm2 shell integration
-[[ -e "${HOME}/.iterm2_shell_integration.zsh" ]] && source "${HOME}/.iterm2_shell_integration.zsh"
+# iTerm2 shell integration for enhanced terminal features
+if [[ -f "${HOME}/.iterm2_shell_integration.zsh" ]]; then
+  source "${HOME}/.iterm2_shell_integration.zsh"
+else
+  echo "iTerm2 integration script not found. Please install via iTerm2."
+fi
 
-echo "Zsh configuration loaded successfully."
+echo "Zsh configuration loaded successfully on macOS."
