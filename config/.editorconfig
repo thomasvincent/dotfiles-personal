@@ -1,26 +1,55 @@
+# EditorConfig is awesome: https://editorconfig.org
+
 # Root settings that apply to all files unless overwritten
 root = true
 
 [*]
 charset = utf-8
-indent_style = space
-indent_size = 4      # Default indent size, overridden for specific types
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Terraform files
-[*.tf]
-indent_size = 2      # Override default indent size for Terraform files
+# Default indentation settings
+indent_style = space
+indent_size = 4
 
-# Shell scripts
+# Override indent size for specific file types
+[*.{tf,sh,rb,json,yaml,yml,js,jsx,html,css,scss,rs,clj}]
+indent_size = 2
+
+# Override indent style for shell scripts
 [*.sh]
-indent_size = 2      # Override default indent size for shell scripts
-indent_style = tab   # Override default indent style (use tab)
+indent_style = tab
 
-# Ruby files
-[*.rb]
-indent_size = 2      # Override default indent size for Ruby files
+# Markdown files
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
 
-# Default settings already match for Python, Java, PHP, Node.js, and Go files
-# No need for specific overrides unless additional deviations are needed
+# Python files
+[*.py]
+indent_size = 4
+
+# Java files
+[*.java]
+indent_size = 4
+
+# PHP files
+[*.php]
+indent_size = 4
+
+# Node.js files
+[*.node]
+indent_size = 4
+
+# Go files
+[*.go]
+indent_size = 4
+
+# Rust files
+[*.rs]
+indent_size = 2
+
+# Clojure files
+[*.clj]
+indent_size = 2
