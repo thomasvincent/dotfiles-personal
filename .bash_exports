@@ -1,0 +1,16 @@
+# ~/.bash_exports - File for exported environment variables
+
+# Default editor
+export EDITOR="vim"
+
+# Shell history settings
+export HISTSIZE=5000                       # Keep a large number of history entries
+export HISTCONTROL=ignoredups:erasedups    # Avoid duplicate entries and overwrite them
+
+# Add custom directories to PATH
+export PATH="$HOME/bin:/usr/local/bin:$PATH"
+
+# FZF configuration for file search
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/"' # Use ripgrep for FZF
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"                # Use same command for CTRL-T
+export FZF_DEFAULT_OPTS='--height 40% --reverse --border'       # FZF UI settings
