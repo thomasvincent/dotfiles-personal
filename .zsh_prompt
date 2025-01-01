@@ -1,0 +1,25 @@
+# ~/.zsh_prompt - File for customizing the Zsh prompt
+
+# Define a function to get the current Git branch
+# This replaces the Bash inline command substitution for portability
+get_git_branch() {
+    git branch --show-current 2>/dev/null
+}
+
+# Check the platform and set prompt colors accordingly
+case "$(uname -s)" in
+    Darwin)
+        # macOS: Green for username@host, blue for path, red for Git branch
+        PROMPT='%F{green}%n@%m %F{blue}%~ %F{red}$(get_git_branch)%f$ '
+        ;;
+    Linux)
+        # Linux: Yellow for username@host, blue for path, red for Git branch
+        PROMPT='%F{yellow}%n@%m %F{blue}%~ %F{red}$(get_git_branch)%f$ '
+        ;;
+    *)
+        # Default: White for username@host, blue for path, red for Git branch
+        PROMPT='%F{white}%n@%m %F{blue}%~ %F{red}$(get_git_branch)%f$ '
+        ;;
+esac
+
+# Enable prompt substitution for inline comma
