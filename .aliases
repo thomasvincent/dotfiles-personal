@@ -1,4 +1,4 @@
-# ~/.aliases - File for user-defined aliases
+# ~/.aliases - File for user-defined aliases and enhancements
 
 # General aliases
 alias ll='ls -alF'  # List with detailed view and file types
@@ -102,9 +102,16 @@ alias gcloudl='gcloud projects list' # List GCP projects
 alias gcloudvm='gcloud compute instances list' # List Compute Engine instances
 alias gcloudk='gcloud container clusters list' # List GKE clusters
 
+# ChezMoi aliases
+alias chez-add='chezmoi add'       # Add a file or directory to ChezMoi
+alias chez-apply='chezmoi apply'   # Apply all changes from ChezMoi
+alias chez-diff='chezmoi diff'     # Show changes to be applied by ChezMoi
+alias chez-edit='chezmoi edit'     # Edit a file managed by ChezMoi
+alias chez-reapply='chezmoi apply --force' # Reapply all changes from ChezMoi
+alias chez-cd='cd $(chezmoi source-path)' # Navigate to the ChezMoi source directory
+
 # Other utilities
 alias venv='python3 -m venv .venv && source .venv/bin/activate' # Create and activate virtual environments
-alias chez='chezmoi'       # Shortcut for Chezmoi dotfile manager
 
 # Cross-platform considerations
 if [ "$(uname -s)" = "Darwin" ]; then
