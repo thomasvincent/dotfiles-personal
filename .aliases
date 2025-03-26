@@ -1,0 +1,125 @@
+# ~/.aliases - File for user-defined aliases and enhancements
+
+# General aliases
+alias ll='ls -alF'  # List with detailed view and file types
+alias la='ls -A'    # List all except '.' and '..'
+alias l='ls -CF'    # List with column view
+
+# Git aliases
+alias gs='git status'      # Show the current Git status
+alias gd='git diff'        # Show Git changes
+alias gc='git commit'      # Commit changes
+alias gca='git commit --amend' # Amend the last commit
+alias gl='git log --oneline --graph --decorate' # Compact Git log
+alias gp='git pull'        # Pull latest changes from remote
+alias gpu='git push'       # Push changes to remote
+
+# GitHub Flow shortcuts
+alias gfpr='git fetch origin pull'  # Fetch a GitHub Pull Request branch
+alias gcm='git checkout main'       # Switch to the `main` branch
+alias gfco='git fetch origin'       # Fetch changes from remote repository
+alias gphb='git push origin HEAD'   # Push current branch to origin
+alias grh='git reset --hard'        # Hard reset current branch to HEAD
+alias grho='git reset --hard origin/main' # Hard reset to origin/main
+
+# Docker and Kubernetes shortcuts
+alias dc='docker-compose'  # Shortcut for docker-compose commands
+alias k='kubectl'          # Shortcut for Kubernetes CLI
+
+# Terraform product aliases
+alias tf='terraform'             # Shortcut for Terraform CLI
+alias tfa='terraform apply'      # Apply Terraform configuration
+alias tfp='terraform plan'       # Generate and show Terraform execution plan
+alias tfi='terraform init'       # Initialize a Terraform configuration directory
+alias tfv='terraform validate'   # Validate Terraform files
+alias tfd='terraform destroy'    # Destroy Terraform-managed infrastructure
+alias tfo='terraform output'     # Display Terraform outputs
+alias tff='terraform fmt -recursive' # Format Terraform files recursively
+alias tfw='terraform workspace'  # Manage Terraform workspaces
+alias tfts='terraform state'     # Manage Terraform state files
+alias tfc='terraform console'    # Open a Terraform console for debugging
+alias tfl='terraform login'      # Log in to Terraform Cloud/Enterprise
+alias tflg='terraform logout'    # Log out from Terraform Cloud/Enterprise
+alias tfs='terraform show'       # Show Terraform plans or state
+alias tfgi='terraform graph'     # Generate a dependency graph
+
+# Vagrant aliases
+alias v='vagrant'                  # Base Vagrant command
+alias vu='vagrant up'              # Start Vagrant environment
+alias vh='vagrant halt'            # Stop Vagrant environment
+alias vs='vagrant ssh'             # SSH into a Vagrant instance
+alias vr='vagrant reload'          # Reload Vagrant environment
+alias vp='vagrant provision'       # Re-provision Vagrant environment
+alias vd='vagrant destroy'         # Destroy a Vagrant environment
+
+# Vault aliases
+alias vaultl='vault login'         # Log in to Vault
+alias vaults='vault status'        # Check Vault status
+alias vaulti='vault init'          # Initialize Vault
+alias vaultr='vault read'          # Read a Vault secret
+alias vaultw='vault write'         # Write a Vault secret
+alias vaultls='vault list'         # List Vault secrets
+
+# Consul aliases
+alias consul='consul'              # Base Consul command
+alias consuls='consul members'     # Show Consul cluster members
+alias consulk='consul kv'          # Consul KV operations
+alias consulks='consul kv store'   # Store a key-value pair in Consul
+alias consulkl='consul kv list'    # List key-value pairs in Consul
+
+# Nomad aliases
+alias nomad='nomad'                # Base Nomad command
+alias nomadj='nomad job'           # Manage Nomad jobs
+alias nomadjr='nomad job run'      # Run a Nomad job
+alias nomadjp='nomad job plan'     # Plan a Nomad job
+alias nomadjf='nomad job stop'     # Stop a Nomad job
+alias nomads='nomad status'        # Show Nomad cluster status
+
+# DigitalOcean aliases
+alias doctl='doctl'                # DigitalOcean CLI
+alias dol='doctl compute droplet list' # List DigitalOcean droplets
+alias dossl='doctl compute ssh'    # SSH into a DigitalOcean droplet
+alias docr='doctl kubernetes cluster' # Manage DigitalOcean Kubernetes clusters
+
+# AWS aliases
+alias aws='aws'                    # AWS CLI base command
+alias awsc='aws configure'         # Configure AWS CLI
+alias awsl='aws s3 ls'             # List AWS S3 buckets
+alias awsu='aws s3 cp'             # Upload a file to S3
+alias awsrm='aws s3 rm'            # Remove a file from S3
+alias awsec2='aws ec2 describe-instances' # List EC2 instances
+
+# Azure aliases
+alias az='az'                      # Azure CLI base command
+alias azl='az group list'          # List Azure resource groups
+alias azvm='az vm list'            # List Azure virtual machines
+alias azaks='az aks list'          # List Azure Kubernetes Service clusters
+
+# Google Cloud aliases
+alias gcloud='gcloud'              # Google Cloud CLI
+alias gcloudi='gcloud init'        # Initialize Google Cloud CLI
+alias gcloudl='gcloud projects list' # List GCP projects
+alias gcloudvm='gcloud compute instances list' # List Compute Engine instances
+alias gcloudk='gcloud container clusters list' # List GKE clusters
+
+# ChezMoi aliases
+alias chez-add='chezmoi add'       # Add a file or directory to ChezMoi
+alias chez-apply='chezmoi apply'   # Apply all changes from ChezMoi
+alias chez-diff='chezmoi diff'     # Show changes to be applied by ChezMoi
+alias chez-edit='chezmoi edit'     # Edit a file managed by ChezMoi
+alias chez-reapply='chezmoi apply --force' # Reapply all changes from ChezMoi
+alias chez-cd='cd $(chezmoi source-path)' # Navigate to the ChezMoi source directory
+
+# Other utilities
+alias venv='python3 -m venv .venv && source .venv/bin/activate' # Create and activate virtual environments
+
+# Cross-platform considerations
+if [ "$(uname -s)" = "Darwin" ]; then
+    alias open='open'       # Use macOS's open command
+    alias pbcopy='pbcopy'   # Copy to clipboard on macOS
+    alias pbpaste='pbpaste' # Paste from clipboard on macOS
+else
+    alias open='xdg-open'   # Use xdg-open on Linux
+    alias pbcopy='xclip -selection clipboard' # Copy to clipboard on Linux
+    alias pbpaste='xclip -selection clipboard -o' # Paste from clipboard on Linux
+fi

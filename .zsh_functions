@@ -1,0 +1,57 @@
+# ~/.zsh_functions - File for user-defined functions
+
+# cdp: Change directory to a specific project
+# Usage: cdp <project_name>
+cdp() {
+    if [ -z "$1" ]; then
+        echo "Usage: cdp <project_name>" >&2
+        return 1
+    fi
+    if [ ! -d "$HOME/projects" ]; then
+        echo "Projects directory not found: $HOME/projects" >&2
+        return 1
+    fi
+    cd "$HOME/projects/$1" || {
+        echo "Project not found: $1" >&2
+        return 1
+    }
+}
+
+# docker-cleanup: Remove unused Docker objects
+# Cleans up containers, images, volumes, and networks to free space
+docker-cleanup() {
+    docker container prune -f
+    docker image prune -f
+    docker volume prune -f
+    docker network prune -f
+}
+
+# kctx: Switch Kubernetes context
+# Usage: kctx <context_name>
+kctx() {
+    if [ -z "$1" ]; then
+        echo "Available contexts:"
+        kubectl config get-contexts || {
+            echo "Failed to list contexts" >&2
+            return 1
+        }
+        return 0
+    fi
+    kubectl config use-context "$1" || {
+        echo "Failed to switch context to $1" >&2
+        return 1
+    }
+}
+
+# gclone: Clone a Git repository and navigate into its directory
+# Usage: gclone <repository_url>
+gclone() {
+    if [ -z "$1" ]; then
+        echo "Usage: gclone <repository_url>" >&2
+        return 1
+    fi
+    git clone "$1" && cd "$(basename "$1" .git)" || {
+        echo "Failed to clone repository: $1" >&2
+        return 1
+    }
+}

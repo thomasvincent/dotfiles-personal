@@ -1,0 +1,45 @@
+# ~/.zsh_completion - Cross-platform tab completion settings for Linux and macOS
+
+# Initialize Zsh completion system
+autoload -Uz compinit
+compinit
+
+# Load system-wide Bash completions if available
+if [ -f "/usr/local/etc/bash_completion" ]; then
+    # Homebrew or system-installed completions (macOS or Linux)
+    source "/usr/local/etc/bash_completion"
+elif [ -f "/opt/homebrew/etc/bash_completion" ]; then
+    # Homebrew completions for macOS on Apple Silicon
+    source "/opt/homebrew/etc/bash_completion"
+elif [ -f "/etc/bash_completion" ]; then
+    # System-wide completions for Linux
+    source "/etc/bash_completion"
+fi
+
+# Git completion for the `g` alias if `_git` is available
+if type _git >/dev/null 2>&1; then
+    zstyle ':completion:*:*:g:*' command _git
+fi
+
+# Add SSH hostnames from ~/.ssh/config for completion
+if [ -f "$HOME/.ssh/config" ]; then
+    # Extract hostnames excluding wildcards
+    ssh_hosts=($(awk '/^Host / && !/\*/ {print $2}' "$HOME/.ssh/config"))
+    # Apply hostname completion to `ssh`, `scp`, and `sftp`
+    compctl -W "${ssh_hosts[*]}" ssh scp sftp
+fi
+
+# General Zsh completion configurations
+zstyle ':completion:*' menu select        # Enable menu-based tab completion
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' # Case-insensitive completion
+zstyle ':completion:*:descriptions' format '%B%d%b' # Bold descriptions in completion
+zstyle ':completion:*:messages' format '%d'         # Format for messages
+
+# Enable file completions for all commands
+zstyle ':completion:*:*:*:*:files' ignored-patterns '*.o' '*.so' '*.pyc'
+
+# Set a cache directory for completion data (improves speed)
+cache_dir="$HOME/.zsh/cache"
+mkdir -p "$cache_dir" 2>/dev/null
+zstyle ':completion::complete:*' use-cache on
+zstyle ':completion::complete:*' cache-path "$cache_dir"

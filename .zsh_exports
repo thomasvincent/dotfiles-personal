@@ -1,0 +1,28 @@
+# ~/.zsh_exports - File for exported environment variables
+
+# Default editor
+export EDITOR="vim"
+
+# Shell history settings
+# - Save a large number of history entries
+# - Share history across Zsh sessions
+export HISTSIZE=5000
+export SAVEHIST=5000
+export HISTFILE="$HOME/.zsh_history"
+
+# Avoid duplicate entries and reduce unnecessary blanks
+setopt HIST_IGNORE_DUPS HIST_REDUCE_BLANKS
+
+# Add custom directories to PATH
+# - Include user-specific bin directories and system-wide binaries
+export PATH="$HOME/bin:/usr/local/bin:$PATH"
+
+# FZF configuration for file search
+if command -v rg >/dev/null 2>&1; then
+    # Use ripgrep (rg) as the default command for FZF if available
+    export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/"'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND" # Same command for CTRL-T
+fi
+
+# FZF UI settings for better usability
+export FZF_DEFAULT_OPTS='--height 40% --reverse --border'
